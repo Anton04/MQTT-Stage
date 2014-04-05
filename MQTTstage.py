@@ -8,19 +8,26 @@ import sys
 
 class MQTTstage():
   def __init__(self,path):
+	
+    if path.find("~") != -1:
+    	path = os.path.expanduser(path)
+
     if not (self.CheckDirectories(path)):
       raise Exception("Can't initialize directorires!")
     self.basepath = path
     
   def CreateDirectory(self,path):
-        #Create directories
+    #Create directories
     try:
-      os.stat(dir)
+      print "Checking " + path
+      os.stat(path)
     except:
       try:
-        os.mkdir(dir)
+	print "Creating " + path
+        os.mkdir(path)
         return True
       except:
+	print "Failed ot create " + path 
         return False 
     
     return True
@@ -32,25 +39,33 @@ class MQTTstage():
       path = path + "/"
     
     #Create directories
+    self.basepath = path
     self.topics = path + "topics/"
     self.actors = path + "actors/"
     self.reactors = path + "reactors/"
     
-    paths = [self.topics, self.actors, self.reactors]
+    paths = [self.basepath,self.topics, self.actors, self.reactors]
     
+    n = 0
+
+    #Create all dirs
     for directory in paths:
-      self.CreateDirectory(directory)
+      n += self.CreateDirectory(directory)
       
-      
+    #Check if we all went well. 
+    if n == len(paths):
+	return True
+    else: 
+	return False  
 
 if __name__ == '__main__':
 
   #Use default path if no argument given. 
-  if len(sys.argv) == 0:
+  if len(sys.argv) == 1:
     BASEPATH = "~/MQTT-Stage"
   else:
-    BASEPATH = sys.argv[0]
+    BASEPATH = sys.argv[1]
 
   print "Lanching MQTT stage at " + BASEPATH
   
-  Stage = MQTTStage(BASEPATH)   
+  Stage = MQTTstage(BASEPATH)   
