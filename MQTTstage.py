@@ -4,16 +4,15 @@
 # 2014-04-05
 
 import os 
+import sys
 
-
-class MQTTstage(path):
-  def __init__(self):
-    
-    if not (self.CheckDirectories(path))
+class MQTTstage():
+  def __init__(self,path):
+    if not (self.CheckDirectories(path)):
       raise Exception("Can't initialize directorires!")
     self.basepath = path
     
-  def CreateDirectory(self,path)
+  def CreateDirectory(self,path):
         #Create directories
     try:
       os.stat(dir)
@@ -48,6 +47,10 @@ if __name__ == '__main__':
 
   #Use default path if no argument given. 
   if len(sys.argv) == 0:
-    BASEPATH = ~/MQTT-Stage
+    BASEPATH = "~/MQTT-Stage"
+  else:
+    BASEPATH = sys.argv[0]
+
+  print "Lanching MQTT stage at " + BASEPATH
   
-  
+  Stage = MQTTStage(BASEPATH)   
