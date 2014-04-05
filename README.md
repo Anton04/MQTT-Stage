@@ -5,9 +5,15 @@ MQTT Stage produces and acts on MQTT messages by running a number of user define
 
 The scipts are divided into two types, actors and reactors. An actor script runns continously and produces MQTT scrips based om some hardware or webresource that it is connected to. An reactor is triggered to run each time a specific event is recieved. 
 
-In hte MQTT stage directory there are three directories. One the actor directory the reactor directory and the topics directory. Whenever a new topic is recived over MQTT a folder path mathing the topic is created inside topics. 
+In hte MQTT stage directory there are three directories. One the actors directory the reactors directory and the topics directory. Whenever a new topic is recived over MQTT a folder path mathing the topic is created inside topics. 
 
 To trigger a scprit a link from the reaktor script in the reactor folder to the path in topic can be created or a script can be directly placed inside the topic path. 
+
+Example of link 
+> ln -s ~/MQTT-Stage/reactors/writeDB.py /MQTT-Stage/topics/myhome/livingroom/temp/updatedatabase.react.py
+
+This will cause the script writeDB to be run whenever we recive a message with the topic: /myhome/livingroom/temp
+
 
 A reactor script
 ________________
