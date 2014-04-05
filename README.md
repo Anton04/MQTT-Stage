@@ -3,7 +3,7 @@ MQTT-Stage
 
 MQTT Stage produces and acts on MQTT messages by running a number of user defined or predefined python scripts. 
 
-The scipts are divided into two types, actors and reactors. An ancotor script runns continously and produces MQTT scrips based om some hardware or webresource that it is connected to. An reactor is triggered to run each time a specific event is recieved. 
+The scipts are divided into two types, actors and reactors. An actor script runns continously and produces MQTT scrips based om some hardware or webresource that it is connected to. An reactor is triggered to run each time a specific event is recieved. 
 
 In hte MQTT stage directory there are three directories. One the actor directory the reactor directory and the topics directory. Whenever a new topic is recived over MQTT a folder path mathing the topic is created inside topics. 
 
