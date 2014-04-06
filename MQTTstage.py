@@ -86,6 +86,8 @@ class MQTTstage():
     	    	raise NameError('Not matching command')
     	except:
     	    print "No pid found"
+    	    p = subprocess.Popen(["ntpq", "-p"], stdout=subprocess.PIPE)
+	    out, err = p.communicate()
     	    
     
 
