@@ -6,6 +6,7 @@
 import os 
 import sys
 import subprocess
+from time import sleep 
 
 class MQTTstage():
   def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None):
@@ -22,21 +23,24 @@ class MQTTstage():
     self.clientId = clientId
     self.user = user
     self.password = password
+
+    self.processes = {}
+    self.running = {}
     
     return
     
   def CreateDirectory(self,path):
     #Create directories
     try:
-      print "Checking " + path
+      #print "Checking folder: " + path
       os.stat(path)
     except:
       try:
-	print "Creating " + path
+	print "Creating folder: " + path
         os.mkdir(path)
         return True
       except:
-	print "Failed ot create " + path 
+	print "Failed to create: " + path 
         return False 
     
     return True
@@ -54,7 +58,7 @@ class MQTTstage():
     self.pid = path + "actors/running"
     self.reactors = path + "reactors/"
     
-    paths = [self.basepath,self.topics, self.actors, self.reactors]
+    paths = [self.basepath,self.topics, self.actors, self.reactors,self.pid]
     
     n = 0
 
@@ -68,7 +72,7 @@ class MQTTstage():
     else: 
 	return False  
 
-  def is_exe(fpath):
+  def is_exe(self,fpath):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
   def StartActors(self):
@@ -77,54 +81,73 @@ class MQTTstage():
     tree = os.walk(self.actors)
     (dirpath, dirnames, filenames) = tree.next()
     
-    ScriptsToRun = []
+    #ScriptsToRun = []
+    #print "Checking actor scripts!"	
     
-    #Check wich ones to that are scrips. 
+    #Check for actor scripts. 
     for file in filenames:
     	#if file[-3:] != ".py"
     	if not self.is_exe(dirpath + "/" + file):
     		continue
+	if file.find(".actor") == -1:
+		continue
+
+	restart=False
+	
+	#Already started? 
+	if file in self.running:
+	    #Yes. Check if running.
+	    if self.running[file][0].poll() is None:
+		#Still running
+		continue
+	    else:
+	 	del self.running[file]
+		print file + " terminated. "
+		restart = True	
+
+    	command = dirpath + file   # the shell command
+
+	if restart:
+	    print "Restarting script: " + command
+	else:
+	    print "Starting script: " + command 
+    	process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+    	#output, error = process.communicate()
+	#print "stuck here"
+    	    
+    	pid_nr = process.pid
+	#TODO write pid to /running
+    	    
+	self.running[file] = [process,command] 
     	
-    	#Check for pid. 
-    	try:
-    	    pid = open(self.pid + "/" + file + ".pid","r")
-    	    pid_nr = pid.readline()
-    	    cmd = open("/proc/%s/cmdline" % pid_nr).readline()
-    	    if cmd.find(dirpath + "/" + file) == -1
-    	    	raise NameError('Not matching command')
-    	    	
-    	except:
-    	    try:	
-    	    	del self.processes[pid_nr]
-    	    except:
-    	    	pass
-    	    print "No pid found. Starting: " + file
-    	    #Run as external process 
-    	    command = dirpath + "/" + file   # the shell command
-    	    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    	    output, error = process.communicate()
-    	    
-    	    pid_nr = process.pid
-    	    
-    	    pid = open(self.pid + "/" + file + ".pid","w")
-    	    pid.write(pid_nr)
-    	    
-    	    pid.close()
-    	    
-    	self.processes[pid_nr] = [command, process, output, error] 
-    	    
-    
+    invalid = []
+
+    #Unload removed scripts    
+    for file in self.running:
+	if file not in filenames:
+	    print file + " removed. Killing process..."
+	    self.running[file][0].kill()
+	    invalid.append(file)
+
+    #Remove reference
+    for file in invalid:	
+    	del self.running[file]
 
     #TODO also check subfolders
+
     
     return
     
 	
-
-for (dirpath, dirnames, filenames) in walk(mypath):
-    f.extend(filenames)
-    break
+  def killall(self):
+    #Kill all running subprocesses
+    for item in self.running:
+	self.running[item][0].kill()
   	
+
+  def __del__(self):
+    self.killall()
+    return
 
 if __name__ == '__main__':
 
@@ -137,3 +160,14 @@ if __name__ == '__main__':
   print "Lanching MQTT stage at " + BASEPATH
   
   Stage = MQTTstage(BASEPATH)   
+
+  #try:
+  if True:
+      while(True):
+          Stage.StartActors()
+          sleep(10)
+ # except:
+      Stage.killall()
+	
+
+     
