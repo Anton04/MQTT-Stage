@@ -8,7 +8,7 @@ import sys
 import subprocess
 
 class MQTTstage():
-  def __init__(self,path):
+  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None):
 	
     if path.find("~") != -1:
     	path = os.path.expanduser(path)
@@ -16,6 +16,14 @@ class MQTTstage():
     if not (self.CheckDirectories(path)):
       raise Exception("Can't initialize directorires!")
     self.basepath = path
+    
+    self.ip = ip
+    self.port = port
+    self.clientId = clientId
+    self.user = user
+    self.password = password
+    
+    return
     
   def CreateDirectory(self,path):
     #Create directories
@@ -79,26 +87,37 @@ class MQTTstage():
     	
     	#Check for pid. 
     	try:
-    	    pid = open(self.pid + "/" + file + ".pid")
+    	    pid = open(self.pid + "/" + file + ".pid","r")
     	    pid_nr = pid.readline()
     	    cmd = open("/proc/%s/cmdline" % pid_nr).readline()
     	    if cmd.find(dirpath + "/" + file) == -1
     	    	raise NameError('Not matching command')
+    	    	
     	except:
-    	    print "No pid found"
-    	    p = subprocess.Popen(["ntpq", "-p"], stdout=subprocess.PIPE)
-	    out, err = p.communicate()
+    	    try:	
+    	    	del self.processes[pid_nr]
+    	    except:
+    	    	pass
+    	    print "No pid found. Starting: " + file
+    	    #Run as external process 
+    	    command = dirpath + "/" + file   # the shell command
+    	    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    	    output, error = process.communicate()
+    	    
+    	    pid_nr = process.pid
+    	    
+    	    pid = open(self.pid + "/" + file + ".pid","w")
+    	    pid.write(pid_nr)
+    	    
+    	    pid.close()
+    	    
+    	self.processes[pid_nr] = [command, process, output, error] 
     	    
     
 
     #TODO also check subfolders
     
-    #Run as external process 
-    command = "gcc -E myHeader.h"  # the shell command
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-
-    #Launch the shell command:
-    output, error = process.communicate()
+    return
     
 	
 
