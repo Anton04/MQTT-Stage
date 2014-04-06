@@ -5,6 +5,7 @@
 
 import os 
 import sys
+import subprocess
 
 class MQTTstage():
   def __init__(self,path):
@@ -42,6 +43,7 @@ class MQTTstage():
     self.basepath = path
     self.topics = path + "topics/"
     self.actors = path + "actors/"
+    self.actors = path + "actors/running"
     self.reactors = path + "reactors/"
     
     paths = [self.basepath,self.topics, self.actors, self.reactors]
@@ -57,6 +59,37 @@ class MQTTstage():
 	return True
     else: 
 	return False  
+
+  def is_exe(fpath):
+    return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+  def StartActors(self):
+  	
+    #List all the files in the actors folder. 
+    tree = walk(self.actors)
+    (dirpath, dirnames, filenames) = tree.next()
+    
+    ScriptsToRun = []
+    
+    #Check wich ones to that are scrips. 
+    for file in filenames:
+    	if file[-3:] != ".py"
+
+    #TODO also check subfolders
+    
+    #Run as external process 
+    command = "gcc -E myHeader.h"  # the shell command
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+
+    #Launch the shell command:
+    output, error = process.communicate()
+    
+	
+
+for (dirpath, dirnames, filenames) in walk(mypath):
+    f.extend(filenames)
+    break
+  	
 
 if __name__ == '__main__':
 
