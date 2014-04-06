@@ -43,7 +43,7 @@ class MQTTstage():
     self.basepath = path
     self.topics = path + "topics/"
     self.actors = path + "actors/"
-    self.actors = path + "actors/running"
+    self.pid = path + "actors/running"
     self.reactors = path + "reactors/"
     
     paths = [self.basepath,self.topics, self.actors, self.reactors]
@@ -66,14 +66,28 @@ class MQTTstage():
   def StartActors(self):
   	
     #List all the files in the actors folder. 
-    tree = walk(self.actors)
+    tree = os.walk(self.actors)
     (dirpath, dirnames, filenames) = tree.next()
     
     ScriptsToRun = []
     
     #Check wich ones to that are scrips. 
     for file in filenames:
-    	if file[-3:] != ".py"
+    	#if file[-3:] != ".py"
+    	if not self.is_exe(dirpath + "/" + file):
+    		continue
+    	
+    	#Check for pid. 
+    	try:
+    	    pid = open(self.pid + "/" + file + ".pid")
+    	    pid_nr = pid.readline()
+    	    cmd = open("/proc/%s/cmdline" % pid_nr).readline()
+    	    if cmd.find(dirpath + "/" + file) == -1
+    	    	raise NameError('Not matching command')
+    	except:
+    	    print "No pid found"
+    	    
+    
 
     #TODO also check subfolders
     
