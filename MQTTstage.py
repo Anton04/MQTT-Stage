@@ -7,10 +7,20 @@ import os
 import sys
 import subprocess
 from time import sleep 
+import mosquitto
 
-class MQTTstage():
-  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None):
-	
+PORT = '/dev/ttyUSB0'
+PREFIX = "rfxcom"
+MQTT_HOST = "localhost"
+TOPIC = "#"
+
+class MQTTstage(mosquitto.Mosquitto):
+  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None, topic = "#"):
+
+    mosquitto.Mosquitto.__init__(self,clientId)
+    
+    self.topic = topic
+    
     if path.find("~") != -1:
     	path = os.path.expanduser(path)
 
@@ -27,7 +37,41 @@ class MQTTstage():
     self.processes = {}
     self.running = {}
     
+    if user != None:
+    	self.username_pw_set(user,password)
+    
+    self.connect(ip)
+    
     return
+    
+  
+    
+  def on_connect(self,mosq, result):
+    self.subscribe(self.topic, 0)
+    
+  def on_message(self,mosq, msg):
+    #try:
+    if True:
+    	print("RECIEVED MQTT MESSAGE: "+msg.topic + " " + str(msg.payload))
+    	topics = msg.topic.split("/")
+    	name = topics[-2]
+    	if topics[-1] == "set":
+    	    value = int(msg.payload)
+    	
+    #except:
+#	    print "Error when parsing incomming message."
+    return
+    
+  def ControlLoop():
+    # schedule the client loop to handle messages, etc.
+    print "Starting MQTT listener"
+    while True:
+    	self.StartActors()
+        time.sleep(0.1)
+        
+        client.loop(10000)
+        #Check if new actors has been added. 
+
     
   def CreateDirectory(self,path):
     #Create directories
@@ -55,10 +99,11 @@ class MQTTstage():
     self.basepath = path
     self.topics = path + "topics/"
     self.actors = path + "actors/"
-    self.pid = path + "actors/running"
+    self.actors_run_always = path + "actors/run-always/"
+    #self.pid = path + "actors/running"
     self.reactors = path + "reactors/"
     
-    paths = [self.basepath,self.topics, self.actors, self.reactors,self.pid]
+    paths = [self.basepath,self.topics, self.actors, self.reactors,self.actors_run_always]
     
     n = 0
 
@@ -164,7 +209,7 @@ if __name__ == '__main__':
   #try:
   if True:
       while(True):
-          Stage.StartActors()
+          Stage.ControlLoop()
           sleep(10)
  # except:
       Stage.killall()
