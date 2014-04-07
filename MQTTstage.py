@@ -39,37 +39,42 @@ class MQTTstage(mosquitto.Mosquitto):
     
     if user != None:
     	self.username_pw_set(user,password)
-    
-    self.connect(ip)
-    
+
+    print "Connecting"
+    print self.connect(ip)
+    #self.subscribe(self.topic, 0)
+    self.on_connect = self.X_on_connect
+    self.on_message = self.X_on_message
+
     return
     
   
     
-  def on_connect(self,mosq, result):
+  def X_on_connect(self, selfX,mosq, result):
+    print "MQTT connected!"
     self.subscribe(self.topic, 0)
     
-  def on_message(self,mosq, msg):
+  def X_on_message(self, selfX,mosq, msg):
     #try:
     if True:
     	print("RECIEVED MQTT MESSAGE: "+msg.topic + " " + str(msg.payload))
     	topics = msg.topic.split("/")
-    	name = topics[-2]
-    	if topics[-1] == "set":
-    	    value = int(msg.payload)
-    	
+
+	#Create directory
+	self.CreateDirectory(self.topics_path + msg.topic)    	
+
     #except:
 #	    print "Error when parsing incomming message."
     return
     
-  def ControlLoop():
+  def ControlLoop(self):
     # schedule the client loop to handle messages, etc.
     print "Starting MQTT listener"
     while True:
     	self.StartActors()
-        time.sleep(0.1)
+        sleep(0.1)
         
-        client.loop(10000)
+        self.loop(10000)
         #Check if new actors has been added. 
 
     
@@ -97,13 +102,13 @@ class MQTTstage(mosquitto.Mosquitto):
     
     #Create directories
     self.basepath = path
-    self.topics = path + "topics/"
+    self.topics_path = path + "topics/"
     self.actors = path + "actors/"
     self.actors_run_always = path + "actors/run-always/"
     #self.pid = path + "actors/running"
     self.reactors = path + "reactors/"
     
-    paths = [self.basepath,self.topics, self.actors, self.reactors,self.actors_run_always]
+    paths = [self.basepath,self.topics_path, self.actors, self.reactors,self.actors_run_always]
     
     n = 0
 
