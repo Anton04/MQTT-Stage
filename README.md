@@ -1,11 +1,13 @@
 MQTT-Stage
 ==========
 
+This utility trigger actions based on MQTT messages. To trigger the script simply put in a file path coresponding to the topic you want to trigger it on. 
+
 MQTT Stage produces and acts on MQTT messages by running a number of user defined or predefined python scripts. 
 
 The scipts are divided into two types, actors and reactors. An actor script runns continously and produces MQTT messages based om some hardware or webresource that it is connected to. An reactor is triggered to run each time a specific event is recieved. 
 
-In the MQTT stage directory there are three directories. One the actors directory the reactors directory and the topics directory. Whenever a new topic is recived over MQTT a folder path mathing the topic is created inside topics. 
+In the MQTT stage directory there are three directories. One the actors directory the reactors directory and the topics directory. Whenever a new topic is recived over MQTT a folder path matching the topic is created inside topics. 
 
 To trigger a scrit place it inside the topic path or create a sympolic link into the path. The script will be started on the first message with the topic maching the script path.  
 
