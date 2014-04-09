@@ -87,9 +87,11 @@ class MQTTstage(mosquitto.Mosquitto):
 
 
   def ControlLoop2(self):
-      while(True):
-      	self.loop()
-        sleep(0.1)
+    # schedule the client loop to handle messages, etc.
+    print "Starting MQTT listener"
+    self.loop_forever()
+    print "Closing connection to MQTT"
+    time.sleep(1)
 
   def CheckPath(self,path,Autocreate=True):
 
@@ -163,7 +165,7 @@ class MQTTstage(mosquitto.Mosquitto):
     return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
   def StartActors(self):
-    self.StartScrips(self.actors)
+    self.StartScrips(self.actors_run_always)
 
   def StartScrips(self,path,reactors=False,recursive=False,topic = None,message = None):
   	
