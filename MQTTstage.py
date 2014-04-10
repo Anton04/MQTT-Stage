@@ -20,6 +20,10 @@ class MQTTstage(mosquitto.Mosquitto):
   def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None, topic = "#"):
 
     mosquitto.Mosquitto.__init__(self,clientId)
+
+    self.output_subs = True
+    self.debugsubs = True
+
     
     self.topic = topic
     
@@ -27,7 +31,7 @@ class MQTTstage(mosquitto.Mosquitto):
     	path = os.path.expanduser(path)
 
     if not (self.CheckDirectories(path)):
-      raise Exception("Can't initialize directorires!")
+      raise Exception("Can't initialize directories!")
     self.basepath = path
     
     self.ip = ip
@@ -48,7 +52,8 @@ class MQTTstage(mosquitto.Mosquitto):
     self.on_connect = self.X_on_connect
     self.on_message = self.X_on_message
 
-    thread.start_new_thread(self.ControlLoop2,())
+    #thread.start_new_thread(self.ControlLoop2,())
+    self.loop_start()
 
     return
     
@@ -85,13 +90,6 @@ class MQTTstage(mosquitto.Mosquitto):
 	self.UnloadRemovedScripts()
 	sleep(10)
 
-
-  def ControlLoop2(self):
-    # schedule the client loop to handle messages, etc.
-    print "Starting MQTT listener"
-    self.loop_forever()
-    print "Closing connection to MQTT"
-    time.sleep(1)
 
   def CheckPath(self,path,Autocreate=True):
 
@@ -220,7 +218,23 @@ class MQTTstage(mosquitto.Mosquitto):
 	    print "Starting actor script: " + command
  	else:
 	    print "Triggering reactor script: " + command
-    	process = subprocess.Popen(commandlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+
+	#if self.debugfiles:
+	#    errorfile = open(dirpath + file + ".err.log","w")
+	#    stdoutfile = open(dirpath + file + ".out.log","w")
+	#else:
+     	#    errorfile = open("/dev/null","w")
+        #    stdoutfile = open("/dev/null","w")
+
+	if self.output_subs:
+	    process = subprocess.Popen(commandlist, stdout=sys.stdout,stderr=sys.stderr, shell=False)
+	else:
+	    if self.debugsubs:
+		outfile = open(os.devnull, 'w')
+	    else:
+	    	outfile = open(dirpath + file + ".log", 'w')
+	    process = subprocess.Popen(commandlist, stdout=outfile,stderr=outfile, shell=False)
+
     	#output, error = process.communicate()
     	    
     	pid_nr = process.pid
