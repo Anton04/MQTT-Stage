@@ -77,6 +77,18 @@ class MQTTstage(mosquitto.Mosquitto):
 	#Create directory
 	if self.CheckPath(path):    	
 	   self.StartScrips(path,reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload))
+	
+	#Also run files in parent directories   
+	for f in range(len(path)-2,len(self.topics_path)-2,-1):
+    		if path[f] != "/":
+        		continue
+    		self.StartScrips(path[:f],reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload)) 
+		
+	
+			
+	
+	   
+	
     #except:
 #	    print "Error when parsing incomming message."
     return
