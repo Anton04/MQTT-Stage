@@ -167,11 +167,11 @@ class MQTTstage(mosquitto.Mosquitto):
 
   def StartScrips(self,path,reactors=False,recursive=False,topic = None,message = None):
   	
-    #List all the files in the actors folder. 
+    #List all the files in the current folder. 
     tree = os.walk(path)
     (dirpath, dirnames, filenames) = tree.next()
     
-    #Check for actor scripts. 
+    #Check for scripts. 
     for file in filenames:
     	#if file[-3:] != ".py"
     	if not self.is_exe(dirpath + "/" + file):
