@@ -82,7 +82,8 @@ class MQTTstage(mosquitto.Mosquitto):
 	for f in range(len(path)-2,len(self.topics_path)-2,-1):
     		if path[f] != "/":
         		continue
-    		self.StartScrips(path[:f],reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload)) 
+		#print path[:f+1]
+    		self.StartScrips(path[:f+1],reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload)) 
 		
 	
 			
