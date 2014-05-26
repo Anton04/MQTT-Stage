@@ -17,14 +17,15 @@ MQTT_HOST = "localhost"
 TOPIC = "#"
 
 class MQTTstage(mosquitto.Mosquitto):
-  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None, topic = "#"):
+  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = "driver", password = "1234", topic = "#"):
 
     mosquitto.Mosquitto.__init__(self,clientId)
 
     self.output_subs = True
     self.debugsubs = True
 
-    
+    self.prefix = "MQTTStage"
+        
     self.topic = topic
     
     if path.find("~") != -1:
@@ -46,6 +47,9 @@ class MQTTstage(mosquitto.Mosquitto):
     if user != None:
     	self.username_pw_set(user,password)
 
+    self.will_set( topic =  "system/" + self.prefix, payload="Offline", qos=1, retain=True)
+
+
     print "Connecting"
     self.connect(ip)
     self.subscribe(self.topic, 0)
@@ -60,7 +64,8 @@ class MQTTstage(mosquitto.Mosquitto):
   
     
   def X_on_connect(self, selfX,mosq, result):
-    #print "MQTT connected!"
+    print "MQTT connected!"
+    self.publish(topic = "system/"+ self.prefix, payload="Online", qos=1, retain=True)
     self.subscribe(self.topic, 0)
     
   def X_on_message(self, selfX,mosq, msg):
@@ -77,6 +82,19 @@ class MQTTstage(mosquitto.Mosquitto):
 	#Create directory
 	if self.CheckPath(path):    	
 	   self.StartScrips(path,reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload))
+	
+	#Also run files in parent directories   
+	for f in range(len(path)-2,len(self.topics_path)-2,-1):
+    		if path[f] != "/":
+        		continue
+		#print path[:f+1]
+    		self.StartScrips(path[:f+1],reactors=True,recursive=False,topic = msg.topic,message = str(msg.payload)) 
+		
+	
+			
+	
+	   
+	
     #except:
 #	    print "Error when parsing incomming message."
     return
@@ -167,11 +185,11 @@ class MQTTstage(mosquitto.Mosquitto):
 
   def StartScrips(self,path,reactors=False,recursive=False,topic = None,message = None):
   	
-    #List all the files in the actors folder. 
+    #List all the files in the current folder. 
     tree = os.walk(path)
     (dirpath, dirnames, filenames) = tree.next()
     
-    #Check for actor scripts. 
+    #Check for scripts. 
     for file in filenames:
     	#if file[-3:] != ".py"
     	if not self.is_exe(dirpath + "/" + file):
