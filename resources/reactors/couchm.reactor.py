@@ -17,7 +17,7 @@ def post(doc):
 
 
 	print "********DEBUG********"
-	print url
+	print config
 	request = urllib2.Request(url, data=json.dumps(doc))
 	auth = base64.encodestring('%(user)s:%(password)s' % config).replace('\n', '')
 	request.add_header('Authorization', 'Basic ' + auth)
