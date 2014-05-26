@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     #Load config file...
 
-    ConfigFile = path + "/couchdb.cfg"
+    ConfigFile = path + "/couchm.cfg"
 
     try:
         f = open(ConfigFile,"r")
