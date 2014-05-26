@@ -75,14 +75,69 @@ if __name__ == '__main__':
         args.message = args.message[:-1]
 
     data = json.loads(args.message)
+
+    #Remove trailing slash
+    if topic[-1] == "/":
+    	topic = topic[:-1]
+    	
+    field = topic.split("/")[-1].lower()
+    
+    
+    if "value" in data:
+    	#Assume power stream only.	
+    	
+    	#Interpolate energy counter 
+    	try:
+    		#Read from file
+    		file = open(path + "/couchm.context","r")
+    		
+    		MeterEvent = json.load(file)
+    		file.close()
+    		
+    		#THIS NEEDS TO BE CHANGED TO MS in other scripts. i.e. 3600000.0
+    		deltaT = (data["time"] - MeterEvent["time"])/3600.0
+    		
+    		MeterEvent["energy"] += (MeterEvent["power"] * deltaT) 
+    		MeterEvent["power"] = data["value"]
+    		MeterEvent["time"] = data["time"]
+    		
+    	#Or create new
+    	except:
+    		print "DEBUG:  Creating first MeterEvent"
+    		MeterEvent = {}
+    		MeterEvent["time"] = data["time"]
+    		MeterEvent["power"] = data["value"]
+    		MeterEvent["energy"] = 0.0
+    		MeterEvent["threshold"] = 1.0
+    	
+    	#Save
+    	try:
+    		file = open(path + "/couchm.context","w")
+    		json.dump(MeterEvent,file)
+    		file.close()
+    	except:
+    		print "CouchM reactor: Unable to save context!"
+    		
+    	power = MeterEvent["power"]
+    	energy_counter = MeterEvent["energy"]
+        power_threshhold = MeterEvent["threshold"]
+        
+    elif "threshold" in data:
+    	#Assume meterevent
+    	power = data["power"]
+    	energy_counter = data["energy"]
+        power_threshhold = data["threshold"]
+    else:
+    	print "CouchM reactor: Unable to interpret data"
+    	exit(0)
     
     #Post data to couchm
     post({
                         	"source": source,
 	                        "timestamp": str(data["time"]),
-	                        "ElectricPower": str(data["value"]),
-	                        "ElectricEnergy": str(0),
-	                        "PowerThreshold": str(1),
+	                        "ElectricPower": str(power),
+	                        "ElectricEnergy": str(energy_counter),
+	                        "PowerThreshold": str(power_threshhold),
 				"ElectricPowerUnoccupied": "0",
 				"ElectricEnergyOccupied": "0",
 				"ElectricEnergyUnoccupied": "0"
