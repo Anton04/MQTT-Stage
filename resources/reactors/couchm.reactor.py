@@ -136,13 +136,13 @@ if __name__ == '__main__':
     #Post data to couchm
     post({
                         	"source": source,
-	                        "timestamp": str(data["time"]),
+	                        "timestamp": str(data["time"]*1000),
 	                        "ElectricPower": str(power),
 	                        "ElectricEnergy": str(energy_counter),
 	                        "PowerThreshold": str(power_threshhold),
-				"ElectricPowerUnoccupied": "0",
+				"ElectricPowerUnoccupied": "0.0",
 				"ElectricEnergyOccupied": str(energy_counter),
-				"ElectricEnergyUnoccupied": "0"
+				"ElectricEnergyUnoccupied": "10.0"
                         })
 
 
