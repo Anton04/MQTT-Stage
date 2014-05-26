@@ -16,8 +16,8 @@ def post(doc):
 	url = 'http://%(server)s/%(database)s/_design/energy_data/_update/measurement' % config
 
 
-	print "********DEBUG********"
-	print config
+	#print "********DEBUG********"
+	#print config
 	request = urllib2.Request(url, data=json.dumps(doc))
 	auth = base64.encodestring('%(user)s:%(password)s' % config).replace('\n', '')
 	request.add_header('Authorization', 'Basic ' + auth)
