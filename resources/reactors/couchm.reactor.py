@@ -42,6 +42,9 @@ if __name__ == '__main__':
     #Load config file...
 
     ConfigFile = path + "/couchm.cfg"
+    
+    #print "******DEBUG*******"
+    #print ConfigFile 
 
     try:
         f = open(ConfigFile,"r")
@@ -51,19 +54,19 @@ if __name__ == '__main__':
         exit(1)
     
     #Read config file.    
-    config = ConfigParser.RawConfigParser(allow_no_value=True)
-    config.read(ConfigFile)
+    configfile = ConfigParser.RawConfigParser(allow_no_value=True)
+    configfile.read(ConfigFile)
 
 
     #Load basic config.
 
     config = {}
-    config["user"] = config.get("CouchDB","user")
-    config["password"] = config.get("CouchDB","password")
-    config["server"] = config.get("CouchDB","server")
-    config["database"] = config.get("CouchDB","database")
+    config["user"] = configfile.get("CouchDB","user")
+    config["password"] = configfile.get("CouchDB","password")
+    config["server"] = configfile.get("CouchDB","server")
+    config["database"] = configfile.get("CouchDB","database")
     
-    source = config.get("CouchM","source")
+    source = configfile.get("CouchM","source")
     
 
     if args.message[0] == '"':
