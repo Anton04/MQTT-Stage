@@ -58,6 +58,9 @@ if __name__ == '__main__':
     config["password"] = config.get("CouchDB","password")
     config["server"] = config.get("CouchDB","server")
     config["database"] = config.get("CouchDB","database")
+    
+    source = config.get("CouchM","source")
+    
 
     if args.message[0] == '"':
 	args.message = args.message[1:]
@@ -68,7 +71,7 @@ if __name__ == '__main__':
     
     #Post data to couchm
     post({
-                        	"source": "anton",
+                        	"source": source,
 	                        "timestamp": str(data["time"]),
 	                        "ElectricPower": str(data["value"]),
 	                        "ElectricEnergy": str(0),
