@@ -77,8 +77,10 @@ if __name__ == '__main__':
     data = json.loads(args.message)
 
     #Remove trailing slash
-    if topic[-1] == "/":
-    	topic = topic[:-1]
+    if args.topic[-1] == "/":
+    	topic = args.topic[:-1]
+    else:
+    	topic = args.topic
     	
     field = topic.split("/")[-1].lower()
     
