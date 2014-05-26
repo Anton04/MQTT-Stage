@@ -6,6 +6,7 @@ import mosquitto
 import os, sys
 import urllib2
 import json, base64
+import ConfigParser
 
 #Posting data to couchDB  
 def post(doc):
