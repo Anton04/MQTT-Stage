@@ -60,7 +60,7 @@ class MQTTstage(mosquitto.Mosquitto):
   
     
   def X_on_connect(self, selfX,mosq, result):
-    print "MQTT connected!"
+    #print "MQTT connected!"
     self.subscribe(self.topic, 0)
     
   def X_on_message(self, selfX,mosq, msg):
@@ -201,23 +201,27 @@ class MQTTstage(mosquitto.Mosquitto):
 
 
 	#Add parameters.
-	param = " -h %s" % self.ip
+        param = []
+	param.append("-h")
+        param.append(self.ip)
 	
 	if topic:
-	    param += " -t %s" % topic
+	    param.append("-t")
+	    param.append(topic)
 	if message:
-	    param += " -m %s" % message
+	    param.append("-m")
+	    param.append("\"" + message + "\"")
 	
 
-    	command = dirpath + file + param  # the shell command
-	commandlist = command.split(" ")
+    	command = [dirpath + file] + param  # the shell command
+	commandline = " ".join(command)
 
 	if restart:
-	    print "Restarting actor script: " + command
+	    print "Restarting actor script: " + commandline
 	elif is_actor:
-	    print "Starting actor script: " + command
+	    print "Starting actor script: " + commandline
  	else:
-	    print "Triggering reactor script: " + command
+	    print "Triggering reactor script: " + commandline
 
 	#if self.debugfiles:
 	#    errorfile = open(dirpath + file + ".err.log","w")
@@ -227,20 +231,20 @@ class MQTTstage(mosquitto.Mosquitto):
         #    stdoutfile = open("/dev/null","w")
 
 	if self.output_subs:
-	    process = subprocess.Popen(commandlist, stdout=sys.stdout,stderr=sys.stderr, shell=False)
+	    process = subprocess.Popen(command, stdout=sys.stdout,stderr=sys.stderr, shell=False)
 	else:
 	    if self.debugsubs:
 		outfile = open(os.devnull, 'w')
 	    else:
 	    	outfile = open(dirpath + file + ".log", 'w')
-	    process = subprocess.Popen(commandlist, stdout=outfile,stderr=outfile, shell=False)
+	    process = subprocess.Popen(command, stdout=outfile,stderr=outfile, shell=False)
 
     	#output, error = process.communicate()
     	    
     	pid_nr = process.pid
 	#TODO write pid to /running
     	    
-	self.running[file] = [process,command] 
+	self.running[file] = [process,commandline] 
     
     #TODO also check subfolders if recursive
 
@@ -251,13 +255,15 @@ class MQTTstage(mosquitto.Mosquitto):
     invalid = []
 
 
-    #Unload removed scripts    
-    for file in self.running:
+    #Unload removed scripts
+    running = self.running
+    
+    for file in running:
         try:
             os.stat(self.running[file][1].split(" ")[0])
 	except:
 	    print file + " removed. Killing process..."
-	    self.running[file][0].kill()
+	    running[file][0].kill()
 	    invalid.append(file)
 
     #Remove reference
