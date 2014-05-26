@@ -17,14 +17,15 @@ MQTT_HOST = "localhost"
 TOPIC = "#"
 
 class MQTTstage(mosquitto.Mosquitto):
-  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = None, password = None, topic = "#"):
+  def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = "driver", password = "1234", topic = "#"):
 
     mosquitto.Mosquitto.__init__(self,clientId)
 
     self.output_subs = True
     self.debugsubs = True
 
-    
+    self.prefix = "MQTTStage"
+        
     self.topic = topic
     
     if path.find("~") != -1:
@@ -46,6 +47,9 @@ class MQTTstage(mosquitto.Mosquitto):
     if user != None:
     	self.username_pw_set(user,password)
 
+    self.will_set( topic =  "system/" + self.prefix, payload="Offline", qos=1, retain=True)
+
+
     print "Connecting"
     self.connect(ip)
     self.subscribe(self.topic, 0)
@@ -61,6 +65,7 @@ class MQTTstage(mosquitto.Mosquitto):
     
   def X_on_connect(self, selfX,mosq, result):
     print "MQTT connected!"
+    self.publish(topic = "system/"+ self.prefix, payload="Online", qos=1, retain=True)
     self.subscribe(self.topic, 0)
     
   def X_on_message(self, selfX,mosq, msg):
