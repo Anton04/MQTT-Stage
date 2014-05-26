@@ -141,7 +141,7 @@ if __name__ == '__main__':
 	                        "ElectricEnergy": str(energy_counter),
 	                        "PowerThreshold": str(power_threshhold),
 				"ElectricPowerUnoccupied": "0",
-				"ElectricEnergyOccupied": "0",
+				"ElectricEnergyOccupied": str(energy_counter),
 				"ElectricEnergyUnoccupied": "0"
                         })
 
