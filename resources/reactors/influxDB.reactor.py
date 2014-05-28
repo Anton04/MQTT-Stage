@@ -44,7 +44,6 @@ if __name__ == '__main__':
 
     #Load basic config.
 
-    config = {}
     host = configfile.get("influxDB","host")
     port = configfile.get("influxDB","port")
     username = configfile.get("influxDB","user")
