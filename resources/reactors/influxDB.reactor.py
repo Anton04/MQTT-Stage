@@ -2,7 +2,7 @@
 
 # This script is ment to be used with MQTTstage and will send MQTT messages to an influxDB database.
 
-from influxdb import client as influxdb
+from influxdb import client
 import argparse
 import mosquitto
 import os, sys
@@ -65,16 +65,18 @@ if __name__ == '__main__':
     #	topic = args.topic
     	
     #field = topic.split("/")[-1].lower()
-    
-    db = influxdb.InfluxDBClient(host, port, username, password, database)
-    
-    data = [
-    	{"points":[[data["time"],data["value"]],
-   	 "name":topic,
-         "columns":["time", "value"]
-  	}]
-    
-    db.write_points(data)
+
+    influxdata = [{"points":[
+			[data["time"],float(data["value"])]
+								],
+			"name":args.topic,"columns":["time", "value"]}]
+
+    #print "DEBUG>>>>>>>>>>>>>>>>"
+    #print data
+    #print influxdata
+
+    db = client.InfluxDBClient(host, port, username, password, database) 
+    db.write_points_with_precision(influxdata,'m')
     
 
 
