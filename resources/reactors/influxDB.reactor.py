@@ -1,32 +1,15 @@
 #!/usr/bin/python 
 
+# This script is ment to be used with MQTTstage and will send MQTT messages to an influxDB database.
+
+from influxdb import client as influxdb
 import argparse
 import mosquitto
-#from pushover import PushoverClient
 import os, sys
-import urllib2
-import json, base64
+import json
 import ConfigParser
 
 
-#Posting data to couchDB  
-def post(doc):
-
-	global config
-
-	url = 'http://%(server)s/%(database)s/_design/energy_data/_update/measurement' % config
-
-
-	#print "********DEBUG********"
-	#print config
-	request = urllib2.Request(url, data=json.dumps(doc))
-	auth = base64.encodestring('%(user)s:%(password)s' % config).replace('\n', '')
-	request.add_header('Authorization', 'Basic ' + auth)
-	request.add_header('Content-Type', 'application/json')
-	request.get_method = lambda: 'POST'
-	urllib2.urlopen(request, timeout=1)
-
-	return
 
 if __name__ == '__main__':
 
@@ -42,7 +25,7 @@ if __name__ == '__main__':
 
     #Load config file...
 
-    ConfigFile = path + "/couchm.cfg"
+    ConfigFile = path + "/influxDB.cfg"
     
     #print "******DEBUG*******"
     #print ConfigFile 
@@ -62,12 +45,11 @@ if __name__ == '__main__':
     #Load basic config.
 
     config = {}
-    config["user"] = configfile.get("CouchDB","user")
-    config["password"] = configfile.get("CouchDB","password")
-    config["server"] = configfile.get("CouchDB","server")
-    config["database"] = configfile.get("CouchDB","database")
-    
-    source = configfile.get("CouchM","source")
+    host = configfile.get("influxDB","host")
+    port = configfile.get("influxDB","port")
+    username = configfile.get("influxDB","user")
+    password = configfile.get("influxDB","password")
+    database = configfile.get("influxDB","database")
     
 
     if args.message[0] == '"':
@@ -78,73 +60,23 @@ if __name__ == '__main__':
     data = json.loads(args.message)
 
     #Remove trailing slash
-    if args.topic[-1] == "/":
-    	topic = args.topic[:-1]
-    else:
-    	topic = args.topic
+    #if args.topic[-1] == "/":
+    #	topic = args.topic[:-1]
+    #else:
+    #	topic = args.topic
     	
-    field = topic.split("/")[-1].lower()
+    #field = topic.split("/")[-1].lower()
     
+    db = influxdb.InfluxDBClient(host, port, username, password, database)
     
-    if "value" in data:
-    	#Assume power stream only.	
-    	
-    	#Interpolate energy counter 
-    	try:
-    		#Read from file
-    		file = open(path + "/couchm.context","r")
-    		
-    		MeterEvent = json.load(file)
-    		file.close()
-    		
-    		#THIS NEEDS TO BE CHANGED TO MS in other scripts. i.e. 3600000.0
-    		deltaT = (data["time"] - MeterEvent["time"])/3600.0
-    		
-    		MeterEvent["energy"] += (MeterEvent["power"] * deltaT) 
-    		MeterEvent["power"] = data["value"]
-    		MeterEvent["time"] = data["time"]
-    		
-    	#Or create new
-    	except:
-    		print "DEBUG:  Creating first MeterEvent"
-    		MeterEvent = {}
-    		MeterEvent["time"] = data["time"]
-    		MeterEvent["power"] = data["value"]
-    		MeterEvent["energy"] = 0.0
-    		MeterEvent["threshold"] = 1.0
-    	
-    	#Save
-    	try:
-    		file = open(path + "/couchm.context","w")
-    		json.dump(MeterEvent,file)
-    		file.close()
-    	except:
-    		print "CouchM reactor: Unable to save context!"
-    		
-    	power = MeterEvent["power"]
-    	energy_counter = MeterEvent["energy"]
-        power_threshhold = MeterEvent["threshold"]
-        
-    elif "threshold" in data:
-    	#Assume meterevent
-    	power = data["power"]
-    	energy_counter = data["energy"]
-        power_threshhold = data["threshold"]
-    else:
-    	print "CouchM reactor: Unable to interpret data"
-    	exit(0)
+    data = [
+    	{"points":[[data["time"],data["value"]],
+   	 "name":topic,
+         "columns":["time", "value"]
+  	}]
     
-    #Post data to couchm
-    post({
-                        	"source": source,
-	                        "timestamp": str(data["time"]),
-	                        "ElectricPower": str(power),
-	                        "ElectricEnergy": str(energy_counter),
-	                        "PowerThreshold": str(power_threshhold),
-				"ElectricPowerUnoccupied": "0.0",
-				"ElectricEnergyOccupied": str(energy_counter),
-				"ElectricEnergyUnoccupied": "10.0"
-                        })
+    db.write_points(data)
+    
 
 
     
