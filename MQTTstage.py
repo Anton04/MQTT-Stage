@@ -199,7 +199,12 @@ class MQTTstage(mosquitto.Mosquitto):
 	is_actor = file.find(".actor") != -1
 	is_reactor = file.find(".reactor") != -1
 
-	if not (is_actor or (is_reactor and reactors)):
+	#If we are running reactors make sure it is one. 
+	if is_reactor and not reactors:
+	    continue
+
+	#If its an actor and this call was made for triggering a reactor ignore it. 
+	if is_actor and reactors:
 	    continue
 
 	restart=False
@@ -274,9 +279,8 @@ class MQTTstage(mosquitto.Mosquitto):
 
 
     #Unload removed scripts
-    running = self.running
     
-    for file in running:
+    for file in self.running:
         try:
             os.stat(self.running[file][1].split(" ")[0])
 	except:
