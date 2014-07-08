@@ -275,7 +275,7 @@ class MQTTstage(mosquitto.Mosquitto):
 		invalid = []
 
 		#Local copy
-		rynning = self.running.copy()
+		running = self.running.copy()
 
 		#Unload removed scripts
 		for file in running:
