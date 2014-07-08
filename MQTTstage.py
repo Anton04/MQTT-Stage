@@ -203,14 +203,18 @@ class MQTTstage(mosquitto.Mosquitto):
 			restart=False
 			
 			#Already started? 
-			if file in self.running:
+			running = self.running.copy()
+			if file in running:
 					#Yes. Check if running.
-					if self.running[file][0].poll() is None:
+					if running[file][0].poll() is None:
 						#Still running
 						if is_actor:
 					 		continue
 					else:
-						del self.running[file]
+						try:
+							del self.running[file]
+						except KeyError:
+							pass
 						if is_actor:
 							print file + " terminated. "
 							restart = True	
