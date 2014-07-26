@@ -283,7 +283,11 @@ class MQTTstage(mosquitto.Mosquitto):
 				os.stat(self.running[file][1].split(" ")[0])
 			except:
 				print file + " removed. Killing process..."
-				running[file][0].kill()
+				try:
+					running[file][0].kill()
+				except:
+					pass
+
 				invalid.append(file)
 
 		#Remove reference
