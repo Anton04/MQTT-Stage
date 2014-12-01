@@ -333,7 +333,7 @@ if __name__ == '__main__':
 			Stage.ControlLoop()
 			sleep(10)
  	except Exception,err:
- 		print print traceback.format_exc()
+ 		print traceback.format_exc()
 		Stage.killall()
 	
 
