@@ -10,6 +10,7 @@ from time import sleep
 import time  
 import mosquitto
 import thread
+import traceback
 
 PORT = '/dev/ttyUSB0'
 PREFIX = "rfxcom"
@@ -327,13 +328,13 @@ if __name__ == '__main__':
 	
 	Stage = MQTTstage(BASEPATH)   
 
-	#try:
-	if True:
+	try:
 		while(True):
 			Stage.ControlLoop()
 			sleep(10)
- # except:
-			Stage.killall()
+ 	except Exception,err:
+ 		print print traceback.format_exc()
+		Stage.killall()
 	
 
 		 
