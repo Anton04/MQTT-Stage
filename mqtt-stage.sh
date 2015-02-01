@@ -18,7 +18,7 @@
  SERVICE='MQTTstage.py'
  OPTIONS=''
  USERNAME='iot'
- APP_PATH='/home/iot/repos/MQTT-Stage'
+ APP_PATH="/home/$USERNAME/repos/MQTT-Stage"
  HISTORY=1024
  INVOCATION="python $SERVICE" 
  ME=`whoami`
