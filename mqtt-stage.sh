@@ -3,7 +3,7 @@
  # version 0.3.9 2014-10-25 (YYYY-MM-DD)
  
  ### BEGIN INIT INFO
- # Provides:   nodered
+ # Provides:   mqttstage
  # Required-Start: $local_fs $remote_fs screen-cleanup
  # Required-Stop:  $local_fs $remote_fs
  # Should-Start:   $network
@@ -18,6 +18,7 @@
  SERVICE='MQTTstage.py'
  OPTIONS=''
  USERNAME='iot'
+ SCREEN='mqttstage'
  APP_PATH="/home/$USERNAME/repos/MQTT-Stage"
  HISTORY=1024
  INVOCATION="python $SERVICE" 
@@ -38,7 +39,7 @@
    else
      echo "Starting $SERVICE..."
      cd $APP_PATH
-     as_user "cd $APP_PATH && screen -h $HISTORY -dmS nodered $INVOCATION"
+     as_user "cd $APP_PATH && screen -h $HISTORY -dmS $SCREEN $INVOCATION"
      sleep 7
      if pgrep -u $USERNAME -f $SERVICE > /dev/null
      then
@@ -54,8 +55,8 @@
    if pgrep -u $USERNAME -f $SERVICE > /dev/null
    then
      echo "Stopping $SERVICE"
-     #as_user "screen -p 0 -S nodered -X eval 'stuff \"say SERVER SHUTTING DOWN IN 10 SECONDS. Saving map...\"\015'"
-     #as_user "screen -p 0 -S nodered -X eval 'stuff \"save-all\"\015'"
+     #as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"say SERVER SHUTTING DOWN IN 10 SECONDS. Saving map...\"\015'"
+     #as_user "screen -p 0 -S $SCREEN -X eval 'stuff \"save-all\"\015'"
      ##sleep 10
      ##as_user "screen -p 0 -S minecraft -X eval 'stuff \"stop\"\015'"
      ##sleep 7
