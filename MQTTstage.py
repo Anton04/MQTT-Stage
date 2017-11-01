@@ -8,7 +8,7 @@ import sys
 import subprocess
 from time import sleep
 import time  
-import mosquitto
+import paho.mqtt.client as mqtt
 import thread
 import traceback
 
@@ -17,10 +17,10 @@ PREFIX = "rfxcom"
 MQTT_HOST = "localhost"
 TOPIC = "#"
 
-class MQTTstage(mosquitto.Mosquitto):
-	def __init__(self,path,ip = "localhost", port = 1883, clientId = "MQTTstage", user = "driver", password = "1234", topic = "#"):
+class MQTTstage(mqtt.Client):
+	def __init__(self,path,ip = "mqtt", port = 1883, clientId = "MQTTstage", user = "driver", password = "1234", topic = "#"):
 
-		mosquitto.Mosquitto.__init__(self,clientId)
+		mqtt.Client.__init__(self,clientId)
 
 		self.output_subs = True
 		self.debugsubs = True
@@ -62,7 +62,7 @@ class MQTTstage(mosquitto.Mosquitto):
 
 		return
 		
-	def X_on_connect(self, selfX,mosq, result):
+	def X_on_connect(self, client, userdata, flags, rc):
 		print "MQTT connected!"
 		self.publish(topic = "system/"+ self.prefix, payload="Online", qos=1, retain=True)
 		self.subscribe(self.topic, 0)
@@ -320,7 +320,7 @@ if __name__ == '__main__':
 
 	#Use default path if no argument given. 
 	if len(sys.argv) == 1:
-		BASEPATH = "~/MQTT-Stage"
+		BASEPATH = "~/stage"
 	else:
 		BASEPATH = sys.argv[1]
 
